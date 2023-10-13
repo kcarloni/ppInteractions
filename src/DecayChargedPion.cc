@@ -33,7 +33,15 @@ double DecayChargedPion::lossLength(const double& lf) const {
 }
 
 double DecayChargedPion::energyFractionMuon() const {
-	return pow_integer<2>(mMuon / mChargedPion);
+
+	// // approximation: beta = 1 and the rest frame opening angle always = 1. (not realistic)
+	// return pow_integer<2>(mMuon / mChargedPion);
+
+	// // approximation: beta = 1:
+	// sample random rest frame angle:
+	Random &random = Random::instance();
+	double x = random.randUniform(0., 1.);
+	return 0.5 * ( (1-x) + (1+x) * pow_integer<2>(mMuon/mChargedPion) );
 }
 
 void DecayChargedPion::performInteraction(Candidate* candidate) const {
@@ -49,13 +57,13 @@ void DecayChargedPion::performInteraction(Candidate* candidate) const {
 	candidate->setActive(false);
 
 	double f = energyFractionMuon();
-	if (haveMuons) {
+	if (haveNeutrinos) {
 		if (random.rand() < pow(1 - f, thinning)) {
 			double w = 1. / pow(1 - f, thinning);
 			candidate->addSecondary(sign * 13, E * (1 - f), pos, w);
 		} 
 	}
-	if (haveNeutrinos) {
+	if (haveMuons) {
 		if (random.rand() < pow(f, thinning))  {
 			double w = 1. / pow(f, thinning);
 			candidate->addSecondary(-sign * 14, E * f, pos, w);
