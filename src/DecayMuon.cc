@@ -19,25 +19,23 @@ void DecayMuon::initSpectra() {
 	electronFraction.clear();
 	muonNeutrinoFraction.clear();
 
-	const int nx = 10000; // number of points to sample energy fraction
-	const int np = nx; // number of points to sample probability array
+	const int nx = 1000; // number of points to sample energy fraction
+	const int np = 10000; // number of points to sample probability array
 
-	// Create an array with energy fractions
-	const double xmin = 1e-10; // minimum energy fraction
-	const double xmax = 1; // maximum energy fraction
+	// create an array with energy fractions
+	std::vector<double> fractions(nx);
+	const double xmin = 1e-12; // minimum energy fraction
+	double dx = (1. - xmin) / nx;
 	for (int i = 0; i < nx; i++) {
-		double dlx = log10(xmax / xmin) / nx;
-		double x_ = log10(xmin) + i * dlx;
-		logFraction.push_back(x_);
+		fractions[i] = xmin + i*dx; 
 	}
 
 	// Create an array with probabilities for sampling
-	const double pmin = xmin; // minimum energy fraction
-	const double pmax = 1; // maximum energy fraction
-	for (int i = 0; i < np; i++) {
-		double dlp = log10(pmax / pmin) / np;
-		double p_ = log10(pmin) + i * dlp;
-		probabilities.push_back(pow(10, p_));
+	const double pmin = 0.;
+	const double pmax = 1.;
+	double dp = (pmax - pmin) / np; 
+	for (int i = 0; i < np; i++ ) {
+		probabilities.push_back( pmin + i * dp );
 	}
 
 	// For a fixed incident proton energy, get distribution of energy fractions.
@@ -50,7 +48,10 @@ void DecayMuon::initSpectra() {
 
 	for (size_t j = 0; j < nx; j++) {
 		// Equations from Gaisser's book, 2016, tab. 6.2
-		double x = pow(10, logFraction[j]); 
+		
+		// double x = pow(10, logFraction[j]); 
+		double x = fractions[j];				// sampled uniformly in [0, 1]! -- dx = constant
+		logFraction.push_back( log10(x) );
 
 		// electrons/muon neutrinos from muon decay
 		double g0 = 5. / 3. - 3. * pow_integer<2>(x) + 4. / 3. * pow_integer<3>(x);
@@ -62,13 +63,6 @@ void DecayMuon::initSpectra() {
 		double h0 = 2. - 6. * pow_integer<2>(x) + 4. * pow_integer<3>(x);
 		double h1 = -2. + 12. * x - 18. * pow_integer<2>(x) + 8. * pow_integer<3>(x);
 		fElectronNeutrino.push_back(h0 + h1);
-
-		// Simplified expressions
-		// double g = 2. + 2. * x * x * (2 * x - 3);
-		// double h = 2. * x * (1 - 2 * x + x * x);
-		// fElectron.push_back(g);
-		// fMuonNeutrino.push_back(g);
-		// fElectronNeutrino.push_back(h);
 	}
 	fElectron.resize(nx);
 	fElectronNeutrino.resize(nx);
@@ -98,12 +92,19 @@ void DecayMuon::initSpectra() {
 
 	// Invert distribution and sample from it
 	for (size_t j = 0; j < probabilities.size(); j++) {
-		double y1 = interpolate(log10(probabilities[j]), logFMuonNeutrino, logFraction);
-		double y2 = interpolate(log10(probabilities[j]), logFElectron, logFraction);
-		double y3 = interpolate(log10(probabilities[j]), logFElectronNeutrino, logFraction);
-		muonNeutrinoFraction.push_back(pow(10, y1));
-		electronFraction.push_back(pow(10, y2));
-		electronNeutrinoFraction.push_back(pow(10, y3));
+		double y1 = interpolate(probabilities[j], fMuonNeutrino, fractions);
+		double y2 = interpolate(probabilities[j], fElectron, fractions);
+		double y3 = interpolate(probabilities[j], fElectronNeutrino, fractions);
+		muonNeutrinoFraction.push_back( y1 );
+		electronFraction.push_back( y2 );
+		electronNeutrinoFraction.push_back( y3 );
+		
+		// double y1 = interpolate(log10(probabilities[j]), logFMuonNeutrino, logFraction);
+		// double y2 = interpolate(log10(probabilities[j]), logFElectron, logFraction);
+		// double y3 = interpolate(log10(probabilities[j]), logFElectronNeutrino, logFraction);
+		// muonNeutrinoFraction.push_back(pow(10, y1));
+		// electronFraction.push_back(pow(10, y2));
+		// electronNeutrinoFraction.push_back(pow(10, y3));
 	}
 }
 
