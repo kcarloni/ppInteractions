@@ -24,7 +24,7 @@ void DecayMuon::initSpectra() {
 
 	// create an array with energy fractions
 	std::vector<double> fractions(nx);
-	const double xmin = 1e-12; // minimum energy fraction
+	const double xmin = 0.; // minimum energy fraction
 	double dx = (1. - xmin) / nx;
 	for (int i = 0; i < nx; i++) {
 		fractions[i] = xmin + i*dx; 
