@@ -5,13 +5,16 @@ project(${PLUGINNAME} CXX)
 
 find_package(PythonInterp)
 find_package(PythonLibs)
-find_package(SWIG REQUIRED)
+
+# find_package(SWIG REQUIRED)
+set(SWIG_EXECUTABLE /n/holylfs05/LABS/arguelles_delgado_lab/Lab/common_software/source/swig-4.0.2/swig)
+find_package(SWIG 4.0 REQUIRED)
 
 # general options
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 # SWIG options
-option(ENABLE_SWIG_BUILTIN "Use SWIG builtin option" OFF) 
+option(ENABLE_SWIG_BUILTIN "Use SWIG builtin option" ON) 
 set(crpropaSwigFile "crpropa.i")
 set(swigModeFlag "")
 if(ENABLE_SWIG_BUILTIN)
