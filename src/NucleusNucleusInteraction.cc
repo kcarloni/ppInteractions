@@ -296,7 +296,7 @@ void NucleusNucleusInteraction::performInteraction(Candidate* candidate) const {
 	}
 
 	if (random.rand() < pow(x, thinning)) {
-		double w = w0 / pow(x, thinning);
+		double w = 1 / pow(x, thinning);
 		candidate->addSecondary(id, x * energy, pos, w);
 	}
 
