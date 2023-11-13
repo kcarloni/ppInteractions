@@ -18,6 +18,9 @@
 #include <crpropa/GridTools.h>
 #include <crpropa/Candidate.h>
 #include <crpropa/Vector3.h>
+#include <crpropa/massDistribution/Density.h>
+#include <crpropa/massDistribution/Massdistribution.h>
+
 
 #include "ppInteractions/Constants.h"
 #include "ppInteractions/ParticleDecay.h"
@@ -45,7 +48,10 @@ class NucleusNucleusInteraction : public crpropa::Module {
 		std::vector<double> chargedPionFraction;
 		std::vector<double> etaMesonFraction;
 		std::vector<double> probabilities;
-		crpropa::ref_ptr<crpropa::Grid1f> densityGrid;
+	
+		// crpropa::ref_ptr<crpropa::Grid1f> densityGrid;
+		crpropa::ref_ptr<crpropa::Density> matter_density;
+
 		bool haveElectrons;
 		bool havePhotons;
 		bool haveNeutrinos;
@@ -61,7 +67,10 @@ class NucleusNucleusInteraction : public crpropa::Module {
 
 	public:
 		NucleusNucleusInteraction(double normMatterField = 1., double thinning = 0, double limit = 0.1);
-		NucleusNucleusInteraction(crpropa::ref_ptr<crpropa::Grid1f> densityGrid, double normMatterField = 1., double thinning = 0, double limit = 0.1);
+
+		NucleusNucleusInteraction(crpropa::ref_ptr<crpropa::Density> density, double normMatterField = 1., double thinning = 0, double limit = 0.1);
+		// NucleusNucleusInteraction(crpropa::ref_ptr<crpropa::Grid1f> densityGrid, double normMatterField = 1., double thinning = 0, double limit = 0.1);
+
 		void setLimit(double limit);
 		void setThinning(double thinning);
 		void setFieldNorm(double normMatterField);

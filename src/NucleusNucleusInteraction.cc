@@ -11,16 +11,19 @@ NucleusNucleusInteraction::NucleusNucleusInteraction(double normMatterField, dou
 	setDescription("NucleusNucleusInteraction");
 }
 
-NucleusNucleusInteraction::NucleusNucleusInteraction(ref_ptr<Grid1f> grid, double normMatterField, double thinning, double limit) : Module() {
+NucleusNucleusInteraction::NucleusNucleusInteraction(ref_ptr<Density> density, double normMatterField, double thinning, double limit) : Module() {
 	setFieldNorm(normMatterField);
 	setLimit(limit);
 	setThinning(thinning);
 	setDescription("NucleusNucleusInteraction");
-	setIsDensityConstant(false);
-	if (normMatterField != 1) 
-		scaleGrid(grid, normMatterField);
 	initMesonSpectra();
-	densityGrid = grid;
+
+	// if (normMatterField != 1) 
+	// 	scaleGrid(grid, normMatterField);
+	// densityGrid = grid;
+
+	setIsDensityConstant(false);
+	matter_density = density;
 }
 
 void NucleusNucleusInteraction::setIsDensityConstant(bool b) {
@@ -211,7 +214,11 @@ double NucleusNucleusInteraction::lossLength(const int& id, const double& energy
 }
 
 double NucleusNucleusInteraction::lossLength(const int& id, const double& energy, const Vector3d& position) const {
-	double rate = crossSection(energy) * densityGrid->interpolate(position);
+	
+	// double rate = crossSection(energy) * densityGrid->interpolate(position);
+
+	double local_density = matter_density->getNucleonDensity( position );
+	double rate = crossSection(energy) * normMatterField * local_density; 
 	return 1. / rate;
 }
 
@@ -252,6 +259,8 @@ void NucleusNucleusInteraction::process(Candidate* candidate) const {
 		performInteraction(candidate);
 		step -= randDistance;
 	} while (step > 0);
+
+	std::cout << "done processing candidate!" << std::endl; 
 }
 
 void NucleusNucleusInteraction::performInteraction(Candidate* candidate) const {
